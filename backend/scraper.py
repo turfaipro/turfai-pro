@@ -1,4 +1,5 @@
 import re, time, logging
+import re, time, logging
 import requests
 from datetime import datetime, date
 from bs4 import BeautifulSoup
