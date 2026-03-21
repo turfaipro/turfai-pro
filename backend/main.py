@@ -1,4 +1,5 @@
- import schedule, time, logging, os, json
+import schedule, time, logging, os, json
+import schedule, time, logging, os, json
 from datetime import datetime, date
 
 from scraper        import scrape_quinte_du_jour, scrape_resultats_pmu, enrichir_cotes_live
