@@ -8,7 +8,7 @@ from datetime import datetime, date
 
 log = logging.getLogger("TurfAI.Generator")
 
-TEMPLATE_PATH = os.environ.get("TEMPLATE_PATH", "/app/template.html")
+TEMPLATE_PATH = os.environ.get("TEMPLATE_PATH", "/app/index.html")
 JOURS_FR = {
     "Monday":"Lundi","Tuesday":"Mardi","Wednesday":"Mercredi",
     "Thursday":"Jeudi","Friday":"Vendredi","Saturday":"Samedi","Sunday":"Dimanche"
