@@ -1,7 +1,3 @@
-
-TurfAI Pro v5 — Scraper PMU
-Sources : API PMU officielle -> Turfoo -> Zeturf
-"""
 import re, time, logging
 import requests
 from datetime import datetime, date
