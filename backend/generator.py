@@ -1,244 +1,161 @@
-"""
-TurfAI Pro v5 — Générateur HTML
-Lit le template base.html et remplace les données de la course + historique.
-Produit exactement la structure JS attendue par le frontend.
-"""
-import os, re, json, logging
+import os, re, json, base64, logging
+import requests
 from datetime import datetime, date
 
 log = logging.getLogger("TurfAI.Generator")
 
-TEMPLATE_PATH = os.environ.get("TEMPLATE_PATH", "/app/../index.html")
 JOURS_FR = {
     "Monday":"Lundi","Tuesday":"Mardi","Wednesday":"Mercredi",
     "Thursday":"Jeudi","Friday":"Vendredi","Saturday":"Samedi","Sunday":"Dimanche"
 }
 MOIS_FR = {
-    1:"Janvier",2:"Février",3:"Mars",4:"Avril",5:"Mai",6:"Juin",
-    7:"Juillet",8:"Août",9:"Septembre",10:"Octobre",11:"Novembre",12:"Décembre"
+    1:"Janvier",2:"Fevrier",3:"Mars",4:"Avril",5:"Mai",6:"Juin",
+    7:"Juillet",8:"Aout",9:"Septembre",10:"Octobre",11:"Novembre",12:"Decembre"
 }
 
+# Variables GitHub pour lire index.html
+GITHUB_TOKEN  = os.environ.get("GITHUB_TOKEN", "")
+GITHUB_OWNER  = os.environ.get("GITHUB_OWNER", "")
+GITHUB_REPO   = os.environ.get("GITHUB_REPO", "turfai-pro")
+GITHUB_BRANCH = os.environ.get("GITHUB_BRANCH", "main")
 
-def date_fr(dt: datetime = None) -> str:
-    dt = dt or datetime.now()
-    j = JOURS_FR.get(dt.strftime("%A"), dt.strftime("%A"))
-    m = MOIS_FR.get(dt.month, dt.strftime("%B"))
-    return f"{j} {dt.day} {m} {dt.year}"
 
-
-def generer_html(data: dict, historique: list) -> str:
-    """
-    Génère le fichier index.html complet.
-    Remplace dans le template :
-      - Les données JS (COURSE, PARTANTS, HISTORIQUE, HISTORIQUE_FULL)
-      - Les blocs HTML statiques (race header, consensus, KPIs dashboard)
-    """
-    # Lire le template
+def lire_template_github():
+    """Lit index.html directement depuis GitHub via l'API."""
+    url = "https://api.github.com/repos/%s/%s/contents/index.html?ref=%s" % (
+        GITHUB_OWNER, GITHUB_REPO, GITHUB_BRANCH
+    )
+    headers = {
+        "Authorization": "Bearer %s" % GITHUB_TOKEN,
+        "Accept": "application/vnd.github+json",
+    }
     try:
-        with open(TEMPLATE_PATH, "r", encoding="utf-8") as f:
-            html = f.read()
-    except FileNotFoundError:
-        log.error(f"Template introuvable : {TEMPLATE_PATH}")
-        raise
+        r = requests.get(url, headers=headers, timeout=20)
+        r.raise_for_status()
+        content_b64 = r.json().get("content", "")
+        content = base64.b64decode(content_b64).decode("utf-8")
+        log.info("Template lu depuis GitHub (%d caracteres)" % len(content))
+        return content
+    except Exception as e:
+        log.error("Impossible de lire index.html depuis GitHub : %s" % str(e))
+        return None
+
+
+def generer_html(data, historique):
+    """Génère le fichier index.html complet avec les nouvelles données."""
+
+    # Lire le template depuis GitHub
+    html = lire_template_github()
+    if not html:
+        log.error("Template introuvable")
+        raise FileNotFoundError("Impossible de lire index.html depuis GitHub")
 
     if not data or not data.get("partants"):
-        log.warning("Pas de données course — template retourné sans modification")
+        log.warning("Pas de donnees course — template retourne sans modification")
         return html
 
-    # ── Préparer les données ──────────────────────────────────
-    course    = data
-    partants  = data["partants"]       # Triés par numéro
-    tries     = data["partants_tries"] # Triés par score IA
-    favori    = data["favori"]
-    best_vb   = data["best_vb"]
-    grilles   = data["grilles"]
-    mises     = data["mises_kelly"]
-    consensus = data.get("consensus", [])
-    nb        = len(partants)
-    today     = datetime.now()
+    partants = data.get("partants", [])
+    tries    = data.get("partants_tries", sorted(partants, key=lambda x: x.get("sc",0), reverse=True))
+    favori   = data.get("favori", tries[0] if tries else {})
+    grilles  = data.get("grilles", {})
+    today    = datetime.now()
 
-    # ── Bloc JS COURSE ────────────────────────────────────────
-    course_js = f"""const COURSE = {{
-  nom: {json.dumps(course['nom'])},
-  ref: {json.dumps(course.get('ref','R1C3'))},
-  lieu: {json.dumps(course['lieu'])},
-  date: {json.dumps(course['date'])},
-  dist: {json.dumps(course['dist'])},
-  alloc: {json.dumps(course['alloc'])},
-  partants: {nb},
-  depart: {json.dumps(course['heure'])}
-}};"""
+    # ── Bloc JS COURSE ────────────────────────────────
+    course_js = "const COURSE = {\n"
+    course_js += "  nom: %s,\n"   % json.dumps(data.get("nom","QUINTE DU JOUR"))
+    course_js += "  ref: %s,\n"   % json.dumps(data.get("ref","R1C3"))
+    course_js += "  lieu: %s,\n"  % json.dumps(data.get("lieu","Hippodrome"))
+    course_js += "  date: %s,\n"  % json.dumps(data.get("date",today.strftime("%d/%m/%Y")))
+    course_js += "  dist: %s,\n"  % json.dumps(data.get("dist","2400m Plat Bon"))
+    course_js += "  alloc: %s,\n" % json.dumps(data.get("alloc","50 000 E"))
+    course_js += "  partants: %d,\n" % len(partants)
+    course_js += "  depart: %s\n" % json.dumps(data.get("heure","15h00"))
+    course_js += "};"
 
-    # ── Bloc JS PARTANTS ──────────────────────────────────────
-    def partant_js(p):
-        nom = p["nom"].replace("'", "\\'").replace('"', '\\"')
-        j   = p["j"].replace("'", "\\'")
-        e   = p["e"].replace("'", "\\'")
-        return (
-            f"  {{ n:{p['n']}, nom:'{nom}', j:'{j}', e:'{e}', "
-            f"p:'{p['p']}', c:'{p['c']}', m:'{p['m']}', "
-            f"sc:{p['sc']}, prob:{p['prob']}, cote:{p['cote']} }}"
+    # ── Bloc JS PARTANTS ──────────────────────────────
+    partants_lines = []
+    for p in partants:
+        nom = str(p.get("nom","")).replace("'","\\'").replace('"','\\"')
+        j   = str(p.get("j","N/A")).replace("'","\\'")
+        e   = str(p.get("e","N/A")).replace("'","\\'")
+        line = "  { n:%d, nom:'%s', j:'%s', e:'%s', p:'%s', c:'%s', m:'%s', sc:%s, prob:%s, cote:%s }" % (
+            p.get("n",0), nom, j, e,
+            p.get("p","58kg"), p.get("c","C.1"),
+            p.get("m","(25) (25) (25)"),
+            str(p.get("sc",50.0)),
+            str(p.get("prob",6.0)),
+            str(p.get("cote",10.0))
         )
+        partants_lines.append(line)
+    partants_js = "const PARTANTS = [\n" + ",\n".join(partants_lines) + "\n];"
 
-    partants_js = "const PARTANTS = [\n"
-    partants_js += ",\n".join(partant_js(p) for p in partants)
-    partants_js += "\n];"
-
-    # ── Bloc JS HISTORIQUE (5 dernières) ─────────────────────
-    histo_recent = [h for h in historique if h.get("reel") is not None][:5]
-    histo_js = "const HISTORIQUE = [\n"
-    histo_rows = []
+    # ── Bloc JS HISTORIQUE (5 derniers) ───────────────
+    histo_recent = [h for h in historique if h.get("reel")][:5]
+    histo_lines  = []
     for h in histo_recent:
-        reel_str = json.dumps(h["reel"]) if h["reel"] else "null"
-        prec_str = str(h["prec"]) if h["prec"] is not None else "null"
-        q5_str   = str(h["quinte"]).lower() if h["quinte"] is not None else "null"
-        histo_rows.append(
-            f"  {{ date:{json.dumps(h['date'])}, nom:{json.dumps(h['nom'])}, "
-            f"lieu:{json.dumps(h['lieu'])}, predit:{json.dumps(h['predit'])}, "
-            f"reel:{reel_str}, prec:{prec_str}, quinte:{q5_str}, profit:{h.get('profit',0)} }}"
-        )
-    histo_js += ",\n".join(histo_rows) + "\n];"
-
-    # ── Bloc JS HISTORIQUE_FULL (30 dernières) ────────────────
-    histo_full_js = "const HISTORIQUE_FULL = [\n"
-    full_rows = []
-    for h in historique[:30]:
         reel_str = json.dumps(h["reel"]) if h.get("reel") else "null"
         prec_str = str(h["prec"]) if h.get("prec") is not None else "null"
-        q5_str   = str(h.get("quinte","false")).lower()
-        full_rows.append(
-            f"  {{ date:{json.dumps(h['date'])}, nom:{json.dumps(h['nom'])}, "
-            f"lieu:{json.dumps(h['lieu'])}, predit:{json.dumps(h.get('predit',[]))}, "
-            f"reel:{reel_str}, prec:{prec_str}, quinte:{q5_str}, profit:{h.get('profit',0)} }}"
+        q5_str   = str(h.get("quinte",False)).lower()
+        histo_lines.append(
+            "  { date:%s, nom:%s, lieu:%s, predit:%s, reel:%s, prec:%s, quinte:%s, profit:%s }" % (
+                json.dumps(h.get("date","")),
+                json.dumps(h.get("nom","")),
+                json.dumps(h.get("lieu","")),
+                json.dumps(h.get("predit",[])),
+                reel_str, prec_str, q5_str,
+                str(h.get("profit",0))
+            )
         )
-    histo_full_js += ",\n".join(full_rows) + "\n];"
+    histo_js = "const HISTORIQUE = [\n" + ",\n".join(histo_lines) + "\n];"
 
-    # ── Remplacements dans le HTML ────────────────────────────
-    # Pattern : remplacer le bloc const COURSE ... jusqu'à const TOTAL_PROB
+    # ── Bloc JS HISTORIQUE_FULL (30 derniers) ─────────
+    full_lines = []
+    for h in historique[:30]:
+        reel_str = json.dumps(h["reel"]) if h.get("reel") else "null"
+        prec_str = str(h.get("prec","null"))
+        q5_str   = str(h.get("quinte",False)).lower()
+        full_lines.append(
+            "  { date:%s, nom:%s, lieu:%s, predit:%s, reel:%s, prec:%s, quinte:%s, profit:%s }" % (
+                json.dumps(h.get("date","")),
+                json.dumps(h.get("nom","")),
+                json.dumps(h.get("lieu","")),
+                json.dumps(h.get("predit",[])),
+                reel_str, prec_str, q5_str,
+                str(h.get("profit",0))
+            )
+        )
+    histo_full_js = "const HISTORIQUE_FULL = [\n" + ",\n".join(full_lines) + "\n];"
+
+    # ── Remplacements dans le HTML ────────────────────
+    html = re.sub(r"const COURSE = \{[\s\S]*?\};", course_js, html, count=1)
+    html = re.sub(r"const PARTANTS = \[[\s\S]*?\];(?=\s*\n\s*const TOTAL_PROB)", partants_js, html, count=1)
+    html = re.sub(r"const HISTORIQUE = \[[\s\S]*?\];(?=\s*\n\s*/\*)", histo_js, html, count=1)
+    html = re.sub(r"const HISTORIQUE_FULL = \[[\s\S]*?\];", histo_full_js, html, count=1)
+
+    # ── Sidebar race widget ───────────────────────────
     html = re.sub(
-        r"const COURSE = \{[\s\S]*?\};",
-        course_js,
-        html, count=1
-    )
-
-    html = re.sub(
-        r"const PARTANTS = \[[\s\S]*?\];(?=\s*\n\s*const TOTAL_PROB)",
-        partants_js,
-        html, count=1
-    )
-
-    html = re.sub(
-        r"const HISTORIQUE = \[[\s\S]*?\];(?=\s*\n\s*/\*)",
-        histo_js,
-        html, count=1
-    )
-
-    html = re.sub(
-        r"const HISTORIQUE_FULL = \[[\s\S]*?\];",
-        histo_full_js,
-        html, count=1
-    )
-
-    # ── Remplacements HTML statiques ─────────────────────────
-    q5  = grilles["quinte"]
-    q5_str = " – ".join(map(str, q5))
-
-    # Race widget sidebar
-    html = re.sub(
-        r'<div class="sidebar-race-name">[^<]*</div>',
-        f'<div class="sidebar-race-name">{course["nom"]}</div>',
+        r'class="sidebar-race-name">[^<]*</div>',
+        'class="sidebar-race-name">%s</div>' % data.get("nom",""),
         html, count=1
     )
     html = re.sub(
-        r'<div class="sidebar-race-meta">[^<]*</div>',
-        f'<div class="sidebar-race-meta">{course["lieu"]} · {course.get("ref","R1C3")} · {course["heure"]}</div>',
+        r'class="sidebar-race-meta">[^<]*</div>',
+        'class="sidebar-race-meta">%s &middot; %s &middot; %s</div>' % (
+            data.get("lieu",""), data.get("ref","R1C3"), data.get("heure","15h00")
+        ),
         html, count=1
     )
 
-    # KPI Dashboard — Favori IA
+    # ── Timestamp ─────────────────────────────────────
+    ts = today.strftime("%d/%m/%Y a %H:%M")
     html = re.sub(
-        r'(<div class="kpi-val" style="color:var\(--green\)">)[^<]*(</div>\s*<div class="kpi-label">Favori IA)',
-        rf'\g<1>N°{favori["n"]}\g<2>',
-        html, count=1
-    )
-    html = re.sub(
-        r'(Favori IA — )[A-Z\s]+(<)',
-        rf'\g<1>{favori["nom"]}\g<2>',
-        html, count=1
-    )
-
-    # Score favori
-    html = re.sub(
-        r'(▲ Score )\d+\.?\d*',
-        rf'\g<1>{favori["sc"]}',
-        html, count=1
-    )
-
-    # Prob victoire max
-    html = re.sub(
-        r'(<div class="kpi-val" style="color:var\(--blue\)">)\d+\.?\d*(%</div>\s*<div class="kpi-label">Prob\.)',
-        rf'\g<1>{favori["prob"]}%\g<2>',
-        html, count=1
-    )
-
-    # Date topbar
-    date_display = f'{JOURS_FR.get(today.strftime("%A"),"Lundi")} {today.day} {MOIS_FR[today.month]} {today.year}'
-    html = re.sub(
-        r'(id="page-title">Dashboard <span>)[^<]*(</span>)',
-        rf'\g<1>{date_display}\g<2>',
-        html, count=1
-    )
-
-    # Race header
-    html = re.sub(
-        r'(PRIX DE LA GLORIETTE — R1C3)',
-        f'{course["nom"]} — {course.get("ref","R1C3")}',
-        html
-    )
-    html = re.sub(r'(<strong>)Saint-Cloud(</strong>)', rf'\g<1>{course["lieu"]}\g<2>', html)
-    html = re.sub(r'(<strong>)2 400m Herbe Lourd(</strong>)', rf'\g<1>{course["dist"]}\g<2>', html)
-    html = re.sub(r'(<strong>)50 900 €(</strong>)', rf'\g<1>{course["alloc"]}\g<2>', html)
-    html = re.sub(r'(<strong>)15h15(</strong>)', rf'\g<1>{course["heure"]}\g<2>', html)
-
-    # Consensus presse (si disponible)
-    if consensus:
-        html = _injecter_consensus(html, consensus)
-
-    # Timestamp génération
-    ts = datetime.now().strftime("%d/%m/%Y à %H:%M")
-    html = re.sub(
-        r'TurfAI Pro v[45]\.0 · [^·]+ R[12]C[0-9] · [^·]+ · \d{2}/\d{2}/\d{4}',
-        f'TurfAI Pro v5 · {course["nom"]} {course.get("ref","R1C3")} · {course["lieu"]} · {course["date"]} · Généré {ts}',
+        r"TurfAI Pro v[45]\.0 [^<'\"]*",
+        "TurfAI Pro v5 · %s %s · %s · Genere %s" % (
+            data.get("nom",""), data.get("ref",""), data.get("lieu",""), ts
+        ),
         html
     )
 
-    log.info(f"✅ HTML généré — {len(html):,} caractères")
+    log.info("HTML genere : %d caracteres" % len(html))
     return html
-
-
-def _injecter_consensus(html: str, consensus: list) -> str:
-    """Remplace le bloc consensus presse dans le HTML."""
-    base_set = set()
-    if consensus:
-        base_set = set(consensus[0].get("base", []))
-
-    src_html = ""
-    for src in consensus:
-        nums_html = "".join(
-            f'<div class="cn {'cn-base' if n in base_set else 'cn-comp'}">{n}</div>'
-            for n in src.get("nums", [])[:8]
-        )
-        src_html += (
-            f'<div class="consensus-row">'
-            f'<span class="source-name">{src["source"]}</span>'
-            f'<div class="consensus-nums">{nums_html}</div>'
-            f'</div>\n        '
-        )
-
-    # Remplacer le contenu du bloc consensus
-    html = re.sub(
-        r'(<div style="padding:14px 18px">)\s*(<div class="consensus-row">[\s\S]*?</div>)\s*(</div>)',
-        rf'\g<1>\n        {src_html}\g<3>',
-        html, count=1
-    )
-    return html
+ 
