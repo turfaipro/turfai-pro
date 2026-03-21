@@ -52,7 +52,7 @@ def get_html(url, timeout=20, retries=2):
 
 def build_meta(dt: datetime, nom: str, ref: str, lieu: str, heure: str,
                dist: str, alloc: str, terrain: str, discipline: str,
-               partants: list, source: str, r: int = 1, c: int = 3) -> dict:
+               partants: list, source: str, r: int = 1, c: int = 3):
     """Construit le dictionnaire de course standardisé."""
     jour = JOURS_FR.get(dt.strftime("%A"), "")
     mois = MOIS_FR.get(dt.month, "")
