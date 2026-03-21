@@ -610,8 +610,8 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 
   <div class="sidebar-race">
     <div class="sidebar-race-label">🟢 Quinté du jour</div>
-    <div class="sidebar-race-name">PRIX DE LA GLORIETTE</div>
-    <div class="sidebar-race-meta">Saint-Cloud · R1C3 · 15h15</div>
+    <div class="sidebar-race-name">GENY.COM : RÉSULTATS ET RAPPORTS PMU : TIERCÉ QUARTÉ QUINTÉ</div>
+    <div class="sidebar-race-meta">Hippodrome - R1C3 - 15h00</div>
   </div>
 
   <nav class="nav">
@@ -1895,34 +1895,31 @@ tr:hover td { background:rgba(255,255,255,0.02); }
    Turfomania, Tirage-Gagnant, ZEturf, Turfoo
 ══════════════════════════════════════════ */
 const COURSE = {
-  nom: 'PRIX DE LA GLORIETTE',
-  ref: 'R1C3',
-  lieu: 'Saint-Cloud',
-  date: '15/03/2026',
-  dist: '2 400m Herbe Lourd',
-  alloc: '50 900 €',
-  partants: 16,
-  depart: '15h15'
+  nom: "GENY.COM : R\u00c9SULTATS ET RAPPORTS PMU : TIERC\u00c9 QUART\u00c9 QUINT\u00c9",
+  ref: "R1C3",
+  lieu: "Hippodrome",
+  date: "21/03/2026",
+  dist: "2400m Plat Bon",
+  alloc: "50000 E",
+  partants: 14,
+  depart: "15h00"
 };
 
 const PARTANTS = [
-  // num, nom, jockey, entr, pds, corde, musique, score, probIA, cote
-  { n:1,  nom:'KARLA JET',           j:'LERNER Y.',      e:'LERNER Y.',        p:'56.5kg',c:'C.6',  m:'(25) 7p 4p 1p 1p 6p 2p 5p', sc:51.2, prob:8.4,  cote:7.5  },
-  { n:2,  nom:'MON RICIN',           j:'DONWORTH TIM',   e:'CHAPPLE-HYAM',     p:'57kg',  c:'C.2',  m:'9p 1p 3p 6p 2p 5p 4p',      sc:61.4, prob:10.9, cote:5.8  },
-  { n:3,  nom:'ZELZARI',             j:'GRANDIN MAR.',   e:'MELE (S) D.',      p:'59kg',  c:'C.5',  m:'4p 1p 2p (25) 1p 3p 1p 8p', sc:87.2, prob:22.8, cote:3.2  },
-  { n:4,  nom:"DON'T SHUT ME DOWN",  j:'DEMURO C.',      e:'BRANDT (S) P&J',   p:'59kg',  c:'C.14', m:'6p (25) 9p 2p 8p 1p 5p 1p', sc:74.6, prob:15.7, cote:4.5  },
-  { n:5,  nom:'PERCIVAL',            j:'PASQUIER S.',    e:'FABRE (S) A.',     p:'54.5kg',c:'C.4',  m:'7p 7p 3p (25) 14p 2p 13p',  sc:44.1, prob:5.3,  cote:9.5  },
-  { n:6,  nom:'DIXMUDE',             j:'BARZALONA M.',   e:'GRAFFARD (S) FH',  p:'58.5kg',c:'C.3',  m:'1p 4p (25) 1p (25) 8p',     sc:67.3, prob:12.8, cote:6.2  },
-  { n:7,  nom:'SENORITO',            j:'SOUMILLON C.',   e:'SOGORB P.',        p:'57.5kg',c:'C.9',  m:'5p 6p (25) 3p 12p 2p 2p 1p',sc:55.8, prob:9.1,  cote:6.8  },
-  { n:8,  nom:'QUEST FOR MAGIC',     j:'BACHELOT T.',    e:'WATTEL (S) S.',    p:'56.5kg',c:'C.8',  m:'(25) 7p 4p 1p 1p 6p 2p 5p', sc:34.2, prob:4.1,  cote:14.0 },
-  { n:9,  nom:'KALAHANI',            j:'GUYON M.',       e:'BOTTI (S) A.',     p:'57.5kg',c:'C.11', m:'3p (25) 1p 2p 2p 2p',        sc:82.1, prob:19.4, cote:3.8  },
-  { n:10, nom:'SEONA',               j:'PICCONE T.',     e:'MONFORT (S) FR.',  p:'58kg',  c:'C.9',  m:'2p (25) 7p 1p 4p 2p 4p 4p', sc:52.3, prob:8.7,  cote:8.0  },
-  { n:11, nom:'MIYALAA',             j:'MADAMET A.',     e:'DUBOIS J.PH.',     p:'56.5kg',c:'C.16', m:'(25) 15p 1p 8p 10p 2p 1p',  sc:30.1, prob:3.4,  cote:20.0 },
-  { n:12, nom:'CHELSEA DU NINIAN',   j:'HARDOUIN E.',    e:'PAYSAN N.',        p:'54.5kg',c:'C.12', m:'3p 8p (25) 6p 9p 1p 11p',   sc:37.4, prob:4.8,  cote:12.0 },
-  { n:13, nom:"PRINCESSE D'AMOUR",   j:'LECOEUVRE C.',   e:'DUBOIS J.PH.',     p:'55.5kg',c:'C.10', m:'(25) 9p 2p 5p 1p 3p 6p 3p', sc:42.7, prob:5.6,  cote:10.0 },
-  { n:14, nom:'INCREMENTAL',         j:'HAMELIN A.',     e:'CAULLERY N.',      p:'54.5kg',c:'C.15', m:'4p 5p 5p (25) 5p 16p 5p 1p', sc:29.4, prob:3.1,  cote:22.0 },
-  { n:15, nom:'DEMPY',               j:'PASQUIER S.',    e:'BONILLA (S) D.',   p:'54.5kg',c:'C.4',  m:'7p 7p 3p (25) 14p 2p 13p',  sc:47.8, prob:6.2,  cote:9.2  },
-  { n:16, nom:'GOLD PLAYER',         j:'CRASTUS A.',     e:'FORESI F.',        p:'57.5kg',c:'C.1',  m:'1p 6p 7p (25) 4p 1p 3p 5p', sc:58.9, prob:10.6, cote:7.2  },
+  { n:1, nom:'EDGAR SABA\ue900\ue901', j:'G. Gelormini', e:'N/A', p:'58kg', c:'C.1', m:'(25) (25) (25)', sc:42.7, prob:7.1, cote:2700.0 },
+  { n:2, nom:'CHITCHAT\ue900\ue901', j:'B. Rochard', e:'N/A', p:'58kg', c:'C.2', m:'(25) (25) (25)', sc:42.7, prob:7.1, cote:2700.0 },
+  { n:3, nom:'HIMBERLAND\ue900\ue901', j:'M. Mottier', e:'N/A', p:'58kg', c:'C.3', m:'(25) (25) (25)', sc:42.7, prob:7.1, cote:2700.0 },
+  { n:4, nom:'HABIT DE SOIR\u00c9E\ue904\ue901', j:'P.-Y. Verva', e:'N/A', p:'58kg', c:'C.4', m:'(25) (25) (25)', sc:42.7, prob:7.1, cote:2700.0 },
+  { n:5, nom:'KARAMBAR\ue900\ue901', j:'A. Abrivard', e:'N/A', p:'58kg', c:'C.5', m:'(25) (25) (25)', sc:42.7, prob:7.1, cote:2700.0 },
+  { n:6, nom:'ELEGANCE KRONOS\ue900\ue901', j:'D. Thomain', e:'N/A', p:'58kg', c:'C.6', m:'(25) (25) (25)', sc:42.7, prob:7.1, cote:2700.0 },
+  { n:7, nom:'JAZZMAN\ue904\ue901', j:'L. Abrivard', e:'N/A', p:'58kg', c:'C.7', m:'(25) (25) (25)', sc:42.7, prob:7.1, cote:2700.0 },
+  { n:8, nom:'JE R\u00caVE DU BOIS\ue904\ue901', j:'A. Barrier', e:'N/A', p:'58kg', c:'C.8', m:'(25) (25) (25)', sc:42.7, prob:7.1, cote:2700.0 },
+  { n:9, nom:'JILORD VIVA\ue900\ue901', j:'E. Raffin', e:'N/A', p:'58kg', c:'C.9', m:'(25) (25) (25)', sc:42.7, prob:7.1, cote:2700.0 },
+  { n:10, nom:'INSTRUMENTALISTE\ue904\ue901', j:'F. Ouvrie', e:'N/A', p:'58kg', c:'C.10', m:'(25) (25) (25)', sc:42.7, prob:7.1, cote:2700.0 },
+  { n:11, nom:'HANNAH', j:'M. Gyre', e:'N/A', p:'58kg', c:'C.11', m:'(25) (25) (25)', sc:42.7, prob:7.1, cote:2700.0 },
+  { n:12, nom:'FOSTER WOOD', j:'F. Nivard', e:'N/A', p:'58kg', c:'C.12', m:'(25) (25) (25)', sc:42.7, prob:7.1, cote:2700.0 },
+  { n:13, nom:'IDYLLE EXPRESS\ue904\ue901', j:'P. P. Ploquin', e:'N/A', p:'58kg', c:'C.13', m:'(25) (25) (25)', sc:42.7, prob:7.1, cote:2700.0 },
+  { n:14, nom:'INDY ROCK', j:'A. Collette', e:'N/A', p:'58kg', c:'C.14', m:'(25) (25) (25)', sc:42.7, prob:7.1, cote:2700.0 }
 ];
 
 const TOTAL_PROB = PARTANTS.reduce((s,p) => s+p.prob, 0);
@@ -1930,11 +1927,11 @@ const IA5 = PARTANTS.slice().sort((a,b)=>b.prob-a.prob).slice(0,5).map(p=>p.n);
 
 /* ══ DATA HISTORIQUE ══ */
 const HISTORIQUE = [
-  { date:'Mar. 10/03/2026',  nom:'PRIX DE GUERVILLE',     lieu:'Saint-Cloud',  predit:[9,3,6,1,14],  reel:[9,3,6,14,1],   prec:88, quinte:true,  profit:12.4  },
-  { date:'Mer. 11/03/2026',  nom:'PRIX KARAMELYOK',        lieu:'Vincennes',    predit:[7,11,3,5,2],  reel:[7,5,11,2,3],   prec:76, quinte:true,  profit:5.8   },
-  { date:'Jeu. 12/03/2026',  nom:'PRIX JOCKER',            lieu:'Chantilly',    predit:[9,11,6,2,8],  reel:[11,9,6,5,2],   prec:80, quinte:true,  profit:8.1   },
-  { date:'Ven. 13/03/2026',  nom:'PIERREFITTE (annulée)',  lieu:'Enghien',      predit:[9,5,7,8,1],   reel:null,           prec:null, quinte:null, profit:0     },
-  { date:'Sam. 14/03/2026',  nom:'PRIX GÉNÉRAL DE ROUGEMONT', lieu:'Auteuil',  predit:[7,2,4,6,14],  reel:[4,2,7,6,3],    prec:72, quinte:false, profit:-3.0  },
+  { date:"Sam. 14/03/2026", nom:"PRIX G\u00c9N\u00c9RAL DE ROUGEMONT", lieu:"Auteuil", predit:[7, 2, 4, 6, 14], reel:[4, 2, 7, 6, 3], prec:72, quinte:false, profit:-3.0 },
+  { date:"Jeu. 12/03/2026", nom:"PRIX JOCKER", lieu:"Chantilly", predit:[9, 11, 6, 2, 8], reel:[11, 9, 6, 5, 2], prec:80, quinte:true, profit:8.1 },
+  { date:"Mer. 11/03/2026", nom:"PRIX KARAMELYOK", lieu:"Vincennes", predit:[7, 11, 3, 5, 2], reel:[7, 5, 11, 2, 3], prec:76, quinte:true, profit:5.8 },
+  { date:"Mar. 10/03/2026", nom:"PRIX DE GUERVILLE", lieu:"Saint-Cloud", predit:[9, 3, 6, 1, 14], reel:[9, 3, 6, 14, 1], prec:88, quinte:true, profit:12.4 },
+  { date:"Dim. 01/03/2026", nom:"PRIX SAINT-ALARY", lieu:"Longchamp", predit:[1, 6, 3, 8, 15], reel:[6, 1, 3, 15, 8], prec:80, quinte:false, profit:4.5 }
 ];
 
 /* ══ HISTORIQUE localStorage ══ */
@@ -3027,21 +3024,15 @@ function goPageMob(id, el){
 // HISTORIQUE ÉTENDU 1 MOIS
 // ═══════════════════════════════════════════════════
 const HISTORIQUE_FULL = [
-  { date:'Mar. 10/03/2026', nom:'PRIX DE GUERVILLE',        lieu:'Saint-Cloud', predit:[9,3,6,1,14],  reel:[9,3,6,14,1],  prec:88, quinte:true,  profit:12.4 },
-  { date:'Mer. 11/03/2026', nom:'PRIX KARAMELYOK',           lieu:'Vincennes',   predit:[7,11,3,5,2],  reel:[7,5,11,2,3],  prec:76, quinte:true,  profit:5.8  },
-  { date:'Jeu. 12/03/2026', nom:'PRIX JOCKER',               lieu:'Chantilly',   predit:[9,11,6,2,8],  reel:[11,9,6,5,2],  prec:80, quinte:true,  profit:8.1  },
-  { date:'Ven. 13/03/2026', nom:'PIERREFITTE (annulée)',      lieu:'Enghien',     predit:[9,5,7,8,1],   reel:null,          prec:null,quinte:null,  profit:0    },
-  { date:'Sam. 14/03/2026', nom:'PRIX GÉNÉRAL DE ROUGEMONT', lieu:'Auteuil',     predit:[7,2,4,6,14],  reel:[4,2,7,6,3],   prec:72, quinte:false, profit:-3.0 },
-  { date:'Ven. 07/03/2026', nom:'PRIX DE LA CAMARGUE',       lieu:'Auteuil',     predit:[2,4,7,1,8],   reel:[2,7,4,8,1],   prec:78, quinte:true,  profit:7.2  },
-  { date:'Jeu. 05/03/2026', nom:'PRIX DE LONGUE VIE',        lieu:'Longchamp',   predit:[5,3,8,12,1],  reel:[5,3,8,1,12],  prec:84, quinte:true,  profit:9.6  },
-  { date:'Mar. 03/03/2026', nom:'PRIX DU BOURBONNAIS',       lieu:'Vichy',       predit:[4,7,2,9,11],  reel:[4,7,9,2,11],  prec:82, quinte:true,  profit:6.3  },
-  { date:'Dim. 01/03/2026', nom:'PRIX SAINT-ALARY',          lieu:'Longchamp',   predit:[1,6,3,8,15],  reel:[6,1,3,15,8],  prec:80, quinte:false, profit:4.5  },
-  { date:'Sam. 28/02/2026', nom:'PRIX DES LILAS',            lieu:'Chantilly',   predit:[8,2,5,11,4],  reel:[8,2,5,4,11],  prec:88, quinte:true,  profit:15.2 },
-  { date:'Ven. 27/02/2026', nom:'PRIX DU GERS',              lieu:'Pau',         predit:[3,9,7,1,12],  reel:[9,3,7,12,1],  prec:80, quinte:false, profit:5.1  },
-  { date:'Mer. 25/02/2026', nom:'PRIX CLAIR DE LUNE',        lieu:'Saint-Cloud', predit:[2,4,6,9,3],   reel:[2,4,9,6,14],  prec:72, quinte:false, profit:-2.0 },
-  { date:'Lun. 23/02/2026', nom:'PRIX UNIVERS II',           lieu:'Auteuil',     predit:[5,1,8,3,7],   reel:[1,5,8,3,7],   prec:84, quinte:true,  profit:11.0 },
-  { date:'Sam. 21/02/2026', nom:'PRIX CHAMILLY',             lieu:'Longchamp',   predit:[7,3,11,5,2],  reel:[7,3,5,11,2],  prec:84, quinte:false, profit:8.8  },
-  { date:'Jeu. 19/02/2026', nom:'PRIX MARLY',                lieu:'Saint-Cloud', predit:[4,6,9,2,14],  reel:[4,6,2,9,14],  prec:84, quinte:false, profit:7.4  },
+  { date:"Sam. 14/03/2026", nom:"PRIX G\u00c9N\u00c9RAL DE ROUGEMONT", lieu:"Auteuil", predit:[7, 2, 4, 6, 14], reel:[4, 2, 7, 6, 3], prec:72, quinte:false, profit:-3.0 },
+  { date:"Jeu. 12/03/2026", nom:"PRIX JOCKER", lieu:"Chantilly", predit:[9, 11, 6, 2, 8], reel:[11, 9, 6, 5, 2], prec:80, quinte:true, profit:8.1 },
+  { date:"Mer. 11/03/2026", nom:"PRIX KARAMELYOK", lieu:"Vincennes", predit:[7, 11, 3, 5, 2], reel:[7, 5, 11, 2, 3], prec:76, quinte:true, profit:5.8 },
+  { date:"Mar. 10/03/2026", nom:"PRIX DE GUERVILLE", lieu:"Saint-Cloud", predit:[9, 3, 6, 1, 14], reel:[9, 3, 6, 14, 1], prec:88, quinte:true, profit:12.4 },
+  { date:"Dim. 01/03/2026", nom:"PRIX SAINT-ALARY", lieu:"Longchamp", predit:[1, 6, 3, 8, 15], reel:[6, 1, 3, 15, 8], prec:80, quinte:false, profit:4.5 },
+  { date:"Sam. 28/02/2026", nom:"PRIX DES LILAS", lieu:"Chantilly", predit:[8, 2, 5, 11, 4], reel:[8, 2, 5, 4, 11], prec:88, quinte:true, profit:15.2 },
+  { date:"Ven. 27/02/2026", nom:"PRIX DU GERS", lieu:"Pau", predit:[3, 9, 7, 1, 12], reel:[9, 3, 7, 12, 1], prec:80, quinte:false, profit:5.1 },
+  { date:"Mer. 25/02/2026", nom:"PRIX CLAIR DE LUNE", lieu:"Saint-Cloud", predit:[2, 4, 6, 9, 3], reel:[2, 4, 9, 6, 14], prec:72, quinte:false, profit:-2.0 },
+  { date:"Lun. 23/02/2026", nom:"PRIX UNIVERS II", lieu:"Auteuil", predit:[5, 1, 8, 3, 7], reel:[1, 5, 8, 3, 7], prec:84, quinte:true, profit:11.0 }
 ];
 
 // ═══════════════════════════════════════════════════
